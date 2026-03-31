@@ -1,44 +1,49 @@
+from itertools import product
 import numpy as np
 from termcolor import colored
 
 class RubiksCube:
     bgColors = ('green', 'red', 'blue', 'magenta', 'white', 'yellow')
-    fgColors = ('white', 'white', 'white', 'white', 'black', 'black')
 
     def __init__(self, startState = None):
         self.cube = np.arange(3 * 3 * 6)
     
     def __str__(self):
         def getCliStr(i):
+            i = self.cube[i]
             return colored(
                 f'{i:2d}',
-                f'{RubiksCube.fgColors[int(i / 9) % 6]}',
-                f'on_{RubiksCube.bgColors[int(i / 9) % 6]}'
+                'black',
+                f'on_{RubiksCube.bgColors[i // 9 % 6]}',
+                ['bold']
                 )
         
         s = ''
+
+        # Top Face
+        for i in range(36, 43, 3):
+            s += ' ' * 9
+            for j in range(3):
+                s += f'{getCliStr(i + j)} '
+            
+            s += '\n'
+
+        # Left, Front, Right, Back Faces
         for i in range(0, 9, 3):
-            for j in range(i, 28 + i, 9):
-                for k in range(3):
-                    s += f'{getCliStr(j + k)} '
+            for j, k in product(range(i, 28 + i, 9), range(3)):
+                s += f'{getCliStr(j + k)} '
             
             s += '\n'
         
-        return s
+        # Bottom Face
+        for i in range(45, 52, 3):
+            s += ' ' * 9
+            for j in range(3):
+                s += f'{getCliStr(i + j)} '
+            
+            s += '\n'
 
-#         return f'''
-#           {rowToStr(36, 39)}
-#           {rowToStr(39, 42)}
-#           {rowToStr(42, 45)}
-#          ------------
-# {rowToStr(0, 3)} | {rowToStr(9, 12)} | {rowToStr(18, 21)} | {rowToStr(27, 30)} 
-# {rowToStr(3, 6)} | {rowToStr(12, 1)} | {rowToStr(c[21, 24])} | {rowToStr(30, 33)} 
-# {rowToStr(6, 9)} | {rowToStr(15, 1)} | {rowToStr(24, 27)} | {rowToStr(33, 36)}
-#          ------------
-#           {rowToStr(45, 48)}
-#           {rowToStr(48, 51)}
-#           {rowToStr(51, )}
-# '''
+        return s
 
     def scramble(self):
         pass
@@ -67,4 +72,37 @@ class RubiksCube:
         (E follows D)
         (S follows F)
         '''
-        pass
+        move = [c for c in move]
+
+        face = move[0]
+        direction = -1 # Clockwise
+
+        if len(move) == 2:
+            direction = 2 if move[1] == '2' else 1            
+        
+        faceSlice = {
+            'L': slice(0, 9),
+            'F': slice(9, 18),
+            'R': slice(18, 27),
+            'B': slice(45, 54),
+            'U': slice(36, 45),
+            'D': slice(45, 54),
+        }
+        face = faceSlice[move[0]]
+
+        self.cube[face] = np.rot90(
+            self.cube[face].reshape(3, 3),
+            k = direction,
+        ).flatten()
+
+        # TODO: don't forget face edges
+
+if __name__ == '__main__':
+    r = RubiksCube()
+    print(r)
+
+    r.makeMove('U')
+    print(r)
+
+    r.makeMove('L2')
+    print(r)
