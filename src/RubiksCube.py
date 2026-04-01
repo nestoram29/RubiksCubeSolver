@@ -1,6 +1,7 @@
 from itertools import product
 import numpy as np
 from termcolor import colored
+import sys
 
 class RubiksCube:
     bgColors = ('green', 'red', 'blue', 'magenta', 'white', 'yellow')
@@ -15,7 +16,7 @@ class RubiksCube:
     }
 
     faceEdges = {
-        'L': [36, 39, 42, 9, 12, 15, 45, 48, 48, 51, 35, 32, 29],
+        'L': [36, 39, 42, 9, 12, 15, 45, 48, 51, 35, 32, 29],
         'F': [42, 43, 44, 18, 21, 24, 47, 46, 45, 8, 5, 2],
         'R': [44, 41, 38, 27, 30, 33, 53, 50, 47, 17, 14, 11],
         'B': [38, 37, 36, 0, 3, 6, 51, 52, 53, 26, 23, 20],
@@ -85,7 +86,7 @@ class RubiksCube:
     def checkInValidState(self):
         pass
     
-    def makeMove(self, move):
+    def doMove(self, move):
         move = [c for c in move]
 
         direction = -1 # Clockwise
@@ -140,11 +141,27 @@ class RubiksCube:
         u' d' r' l' f' b'
         '''
         self._faceMove(move.upper(), direction)
+
+        if move in {'u', 'r', 'b'}:
+            direction *= -1
+
         self._sliceMove(RubiksCube.wideMoves[move], direction)
+    
+    def doMoves(self, moves):
+        if isinstance(moves, str):
+            moves = moves.split()
+
+        for move in moves:
+            self.doMove(move)
 
 if __name__ == '__main__':
     r = RubiksCube()
     print(r)
 
-    r.makeMove('E+')
+    if len(sys.argv) > 1:
+        r.doMoves(sys.argv[1:])
+    else:
+        superflip = "U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"
+        r.doMoves(superflip)
+
     print(r)
