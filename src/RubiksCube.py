@@ -10,7 +10,7 @@ class RubiksCube:
         'L': slice(0, 9),
         'F': slice(9, 18),
         'R': slice(18, 27),
-        'B': slice(45, 54),
+        'B': slice(27, 36),
         'U': slice(36, 45),
         'D': slice(45, 54),
     }
@@ -25,18 +25,18 @@ class RubiksCube:
     }
 
     slices = {
-        'M': [37, 40, 43, 10, 13, 16, 46, 49, 52, 34, 31, 28],
-        'E': [3, 4, 5, 12, 13, 14, 21, 22, 23, 30, 31, 32],
-        'S': [39, 40, 41, 19, 22, 25, 50, 49, 48, 7, 4, 1],
+        'M': ['L.', 'R'],
+        'E': ['U', 'D.'],
+        'S': ['F.', 'B'],
     }
 
     wideMoves = {
-        'u': 'E',
-        'd': 'E',
-        'r': 'M',
-        'l': 'M',
-        'f': 'S',
-        'b': 'S',
+        'u': 'D',
+        'd': 'U',
+        'r': 'L',
+        'l': 'R',
+        'f': 'B',
+        'b': 'F',
     }
 
 
@@ -86,42 +86,39 @@ class RubiksCube:
     def checkInValidState(self):
         pass
     
-    def doMove(self, move):
-        move = [c for c in move]
-
-        direction = -1 # Clockwise
-
-        if len(move) == 2:
-            direction = 2 if move[1] == '2' else 1            
-        
-        move = move[0]
-        if move in RubiksCube.faces:
-            self._faceMove(move, direction)
-        elif move in RubiksCube.slices:
-            self._sliceMove(move, direction)
+    def doMove(self, move):        
+        if move[0] in RubiksCube.faces:
+            self._faceMove(move)
+        elif move[0] in RubiksCube.slices:
+            self._sliceMove(move)
         else:
-            self._wideMove(move, direction)
+            self._wideMove(move)
 
 
-    def _faceMove(self, move, direction):
+    def _faceMove(self, move):
         '''
         Face Turns:
         U  D  R  L  F  B  (clockwise)
         U' D' R' L' F' B' (counterclockwise)
         U2 D2 R2 L2 F2 B2
         '''
-        face = RubiksCube.faces[move]
+        direction = -1 # Clockwise
+
+        if len(move) == 2:
+            direction = 2 if move[1] == '2' else 1
+
+        face = RubiksCube.faces[move[0]]
 
         self.cube[face] = np.rot90(
             self.cube[face].reshape(3, 3),
             k = direction,
         ).flatten()
 
-        edgeIndices = RubiksCube.faceEdges[move]
+        edgeIndices = RubiksCube.faceEdges[move[0]]
 
         self.cube[edgeIndices] = np.roll(self.cube[edgeIndices], -3 * direction)
 
-    def _sliceMove(self, move, direction):
+    def _sliceMove(self, move):
         '''
         Slice Moves
         M  E  S
@@ -131,21 +128,26 @@ class RubiksCube:
         (E follows D)
         (S follows F)
         '''
-        sliceIndices = RubiksCube.slices[move]
-        self.cube[sliceIndices] = np.roll(self.cube[sliceIndices], -3 * direction)
+        modifier = move[1] if len(move) == 2 else None
 
-    def _wideMove(self, move, direction):
+        faceMoves = RubiksCube.slices[move[0]]
+
+        for faceMove in faceMoves:
+            if modifier == '2':
+                faceMove = f'{faceMove[0]}2'
+            elif modifier is not None:
+                faceMove = faceMove[0] + ('.' if len(faceMove) != 2 else '')
+
+            self._faceMove(faceMove)
+
+    def _wideMove(self, move):
         '''
         Wide Moves
         u  d  r  l  f  b
         u' d' r' l' f' b'
         '''
-        self._faceMove(move.upper(), direction)
-
-        if move in {'u', 'r', 'b'}:
-            direction *= -1
-
-        self._sliceMove(RubiksCube.wideMoves[move], direction)
+        # TODO: fix reverse issue
+        self.doMove(RubiksCube.wideMoves[move])
     
     def doMoves(self, moves):
         if isinstance(moves, str):
