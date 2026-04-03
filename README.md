@@ -1,3 +1,5 @@
+# Rubiks Cube Solvers
+
 A collection of high-performance solvers exploring state-space search and heuristic optimization, inspired by techniques in "Artificial Intelligence: A Modern Approach" by Russell & Norvig.
 
 🎯 Project Overview
