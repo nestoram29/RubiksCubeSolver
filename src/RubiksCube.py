@@ -146,8 +146,11 @@ class RubiksCube:
         u  d  r  l  f  b
         u' d' r' l' f' b'
         '''
-        # TODO: fix reverse issue
-        self.doMove(RubiksCube.wideMoves[move])
+        faceMove = RubiksCube.wideMoves[move[0]]
+
+        faceMove += move[1] if len(move) == 2 else ''
+
+        self.doMove(faceMove)
     
     def doMoves(self, moves):
         if isinstance(moves, str):
