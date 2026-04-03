@@ -167,18 +167,30 @@ class RubiksCube:
 
         for move in moves:
             self.doMove(move)
+    
+    def reverseMoves(self, moves):
+        if isinstance(moves, str):
+            moves = moves.split()
+        
+        for move in moves[::-1]:
+            if len(move) == 2:
+                if move[1] != '2':
+                    move = move[0]
+            else:
+                move += '.'
+            
+            self.doMove(move)
 
 if __name__ == '__main__':
     r = RubiksCube()
     print(r)
 
-    print('In solved state:', r.isSolved())
-
     if len(sys.argv) > 1:
         r.doMoves(sys.argv[1:])
     else:
-        # superflip = "U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"
-        r.scramble()
-
-    print(r)
-    print('In solved state:', r.isSolved())
+        superflip = "U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"
+        r.doMoves(superflip)
+        print(r)
+        r.reverseMoves(superflip)
+        print(r)
+    
