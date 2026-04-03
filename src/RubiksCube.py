@@ -1,5 +1,6 @@
-from itertools import product
+from itertools import chain, product
 import numpy as np
+import random
 from termcolor import colored
 import sys
 
@@ -40,7 +41,7 @@ class RubiksCube:
     }
 
 
-    def __init__(self, startState = None):
+    def __init__(self):
         self.cube = np.arange(3 * 3 * 6)
     
     def __str__(self):
@@ -81,10 +82,22 @@ class RubiksCube:
         return s
 
     def scramble(self):
-        pass
+        moves = list(chain(
+            RubiksCube.faces.keys(),
+            RubiksCube.slices.keys(),
+            RubiksCube.wideMoves.keys(),
+        ))
+
+        modifiers = ['', '.', '2']
+
+        for _ in range(30):
+            move = random.choice(moves)
+            move += random.choice(modifiers)
+            
+            self.doMove(move)
     
-    def checkInValidState(self):
-        pass
+    def isSolved(self):
+        return np.array_equal(self.cube, np.arange(3 * 3 * 6))
     
     def doMove(self, move):        
         if move[0] in RubiksCube.faces:
@@ -93,7 +106,6 @@ class RubiksCube:
             self._sliceMove(move)
         else:
             self._wideMove(move)
-
 
     def _faceMove(self, move):
         '''
@@ -121,12 +133,9 @@ class RubiksCube:
     def _sliceMove(self, move):
         '''
         Slice Moves
-        M  E  S
-        M' E' S'
-        M2 E2 S2
-        (M follows L)
-        (E follows D)
-        (S follows F)
+        M  M' M2 (follows L)
+        E  E' E2 (follows D)
+        S  S' S2 (follows F)
         '''
         modifier = move[1] if len(move) == 2 else None
 
@@ -163,10 +172,13 @@ if __name__ == '__main__':
     r = RubiksCube()
     print(r)
 
+    print('In solved state:', r.isSolved())
+
     if len(sys.argv) > 1:
         r.doMoves(sys.argv[1:])
     else:
-        superflip = "U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"
-        r.doMoves(superflip)
+        # superflip = "U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"
+        r.scramble()
 
     print(r)
+    print('In solved state:', r.isSolved())
