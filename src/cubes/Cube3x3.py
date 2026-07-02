@@ -4,7 +4,7 @@ import random
 from termcolor import colored
 import sys
 
-class RubiksCube:
+class Cube3x3:
     bgColors = ('green', 'red', 'blue', 'magenta', 'white', 'yellow')
 
     faces = {
@@ -50,7 +50,7 @@ class RubiksCube:
             return colored(
                 f'{i:2d}',
                 'black',
-                f'on_{RubiksCube.bgColors[i // 9 % 6]}',
+                f'on_{Cube3x3.bgColors[i // 9 % 6]}',
                 ['bold']
                 )
         
@@ -83,9 +83,9 @@ class RubiksCube:
 
     def scramble(self):
         moves = list(chain(
-            RubiksCube.faces.keys(),
-            RubiksCube.slices.keys(),
-            RubiksCube.wideMoves.keys(),
+            Cube3x3.faces.keys(),
+            Cube3x3.slices.keys(),
+            Cube3x3.wideMoves.keys(),
         ))
 
         modifiers = ['', '.', '2']
@@ -100,9 +100,9 @@ class RubiksCube:
         return np.array_equal(self.cube, np.arange(3 * 3 * 6))
     
     def doMove(self, move):        
-        if move[0] in RubiksCube.faces:
+        if move[0] in Cube3x3.faces:
             self._faceMove(move)
-        elif move[0] in RubiksCube.slices:
+        elif move[0] in Cube3x3.slices:
             self._sliceMove(move)
         else:
             self._wideMove(move)
@@ -119,14 +119,14 @@ class RubiksCube:
         if len(move) == 2:
             direction = 2 if move[1] == '2' else 1
 
-        face = RubiksCube.faces[move[0]]
+        face = Cube3x3.faces[move[0]]
 
         self.cube[face] = np.rot90(
             self.cube[face].reshape(3, 3),
             k = direction,
         ).flatten()
 
-        edgeIndices = RubiksCube.faceEdges[move[0]]
+        edgeIndices = Cube3x3.faceEdges[move[0]]
 
         self.cube[edgeIndices] = np.roll(self.cube[edgeIndices], -3 * direction)
 
@@ -139,7 +139,7 @@ class RubiksCube:
         '''
         modifier = move[1] if len(move) == 2 else None
 
-        faceMoves = RubiksCube.slices[move[0]]
+        faceMoves = Cube3x3.slices[move[0]]
 
         for faceMove in faceMoves:
             if modifier == '2':
@@ -155,7 +155,7 @@ class RubiksCube:
         u  d  r  l  f  b
         u' d' r' l' f' b'
         '''
-        faceMove = RubiksCube.wideMoves[move[0]]
+        faceMove = Cube3x3.wideMoves[move[0]]
 
         faceMove += move[1] if len(move) == 2 else ''
 
@@ -182,7 +182,7 @@ class RubiksCube:
             self.doMove(move)
 
 if __name__ == '__main__':
-    r = RubiksCube()
+    r = Cube3x3()
     print(r)
 
     if len(sys.argv) > 1:
